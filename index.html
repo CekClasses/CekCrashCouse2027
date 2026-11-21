@@ -33,7 +33,8 @@ h2{font-size:1.35rem;line-height:1.25;font-weight:800;color:var(--black)}
 .chip{font:inherit;font-size:.92rem;font-weight:600;color:var(--text);background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:11px 16px;min-height:46px;cursor:pointer}
 .chip[aria-pressed=true]{background:var(--black);border-color:var(--black);color:#fff}
 .chip[aria-pressed=true]::after{content:"";display:inline-block;width:7px;height:7px;margin-left:9px;border-radius:50%;background:var(--red)}
-.chip.wide{flex:1 1 100%;text-align:left}.chips.invalid .chip{border-color:var(--red)}
+.chip.wide{flex:1 1 100%;text-align:left}.chips.scroll{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch}.chips.scroll .chip{flex:none;white-space:nowrap}
+.chips.invalid .chip{border-color:var(--red)}
 input{width:100%;font:inherit;font-size:1rem;color:var(--black);background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;min-height:50px;outline:none}
 input:focus{border-color:var(--black);box-shadow:0 0 0 3px rgba(8,8,8,.08)}
 input.invalid{border-color:var(--red);box-shadow:0 0 0 3px rgba(229,9,20,.12)}
@@ -111,6 +112,8 @@ button:focus-visible{outline:3px solid rgba(8,8,8,.35);outline-offset:2px}
 var CEK_API = 'https://script.google.com/macros/s/AKfycbxgPnf-WyaL1WkMFAAG_bZ6NyGRSjM9GOOzw1jPw8zrtuOU17caEKqkoe8iFbyzvtdR/exec';
 var TEACHER_WHATSAPP = '';      // e.g. '919876543210' (no +). Empty hides the button.
 var FEE_TEXT = 'The online batch is ₹2499 for 3 months.';   // change the offer text here
+var DEMO_DAYS = 7;                              // how many days ahead students can book
+var DEMO_SLOTS = ['10:00 AM','12:00 PM','4:00 PM','5:00 PM','6:00 PM','7:00 PM'];   // edit your demo times
 var BATCH_TEXT = '<b>Batch:</b> starts soon. Demo class details will come on WhatsApp.';
 
 (function () {
@@ -124,6 +127,8 @@ function newId() { return 'L' + Date.now().toString(36) + Math.random().toString
 var leadId = newId();
 
 // ===== Question definitions (the form is built from this) =====
+var DAYN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var DATES = []; for (var di = 1; di <= DEMO_DAYS; di++) { var dd = new Date(); dd.setDate(dd.getDate() + di); DATES.push(DAYN[dd.getDay()] + ' ' + dd.getDate() + ' ' + MON[dd.getMonth()]); }
 var Q = {
  1: [ {k:'name',t:'text',label:'Student name',ph:'First name is enough',max:60,msg:'Please enter the student name.'},
       {k:'class',t:'single',label:'Class',o:['9','10','11','12']},
@@ -136,6 +141,8 @@ var Q = {
  3: [ {k:'otherSubjects',t:'multi',label:'Other subjects that are creating problems',hint:"Even if we don't teach them yet, this tells us what you struggle with.",o:['Chemistry','Biology','English','Hindi','Social Science','Accountancy','Other','No other subject'],ex:'No other subject',oph:'Type the subject, e.g. Economics'},
       {k:'worry',t:'multi',wide:1,label:'Biggest worries',opt:'(pick any)',o:['Syllabus not finished','Weak topics','Low test scores',"Can't stay consistent",'Doubts not getting solved']},
       {k:'timing',t:'single',label:'Which timing suits you?',o:['Morning','Afternoon','Evening','Weekends only','Specific time']},
+      {k:'demoDate',t:'single',scroll:1,ifDemo:1,label:'Pick a date for your free demo class',hint:'Tap a day, then a time.',o:DATES},
+      {k:'demoTime',t:'single',ifDemo:1,label:'Pick a demo time',o:DEMO_SLOTS},
       {k:'school',t:'text',label:'School',ph:'e.g. Government Senior Secondary School, Phase 5',max:80,msg:'Please enter the school name.'} ]
 };
 var S = {};   // chip answers: S[key] = [values]
@@ -144,12 +151,12 @@ function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return {'&'
 function build() {
   [1, 2, 3].forEach(function (n) {
     $('#f' + n).innerHTML = Q[n].map(function (f) {
-      var h = '<div class="q"><' + (f.t === 'text' || f.t === 'phone' ? 'label for="' + f.k + '"' : 'span') + ' class="label">' + f.label + (f.opt ? ' <span class="opt">' + f.opt + '</span>' : '') + '</' + (f.t === 'text' || f.t === 'phone' ? 'label' : 'span') + '>';
+      var h = '<div class="q" id="q_' + f.k + '"><' + (f.t === 'text' || f.t === 'phone' ? 'label for="' + f.k + '"' : 'span') + ' class="label">' + f.label + (f.opt ? ' <span class="opt">' + f.opt + '</span>' : '') + '</' + (f.t === 'text' || f.t === 'phone' ? 'label' : 'span') + '>';
       if (f.hint) h += '<p class="hint">' + esc(f.hint) + '</p>';
       if (f.t === 'text') h += '<input type="text" id="' + f.k + '" maxlength="' + f.max + '" placeholder="' + esc(f.ph) + '" autocomplete="off">';
       else if (f.t === 'phone') h += '<input type="tel" id="phone" inputmode="numeric" maxlength="16" placeholder="' + f.ph + '" autocomplete="tel"><input type="text" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">';
       else {
-        h += '<div class="chips" data-k="' + f.k + '" data-mode="' + f.t + '">' + f.o.map(function (o) {
+        h += '<div class="chips' + (f.scroll ? ' scroll' : '') + '" data-k="' + f.k + '" data-mode="' + f.t + '">' + f.o.map(function (o) {
           return '<button type="button" class="chip' + (f.wide ? ' wide' : '') + '" data-v="' + esc(o) + '">' + esc(o) + '</button>'; }).join('') + '</div>';
         if (f.oph) h += '<div class="ob" id="ob_' + f.k + '"><input type="text" id="o_' + f.k + '" maxlength="80" placeholder="' + esc(f.oph) + '" autocomplete="off"></div>';
         if (f.k === 'timing') h += '<div class="ob" id="ob_timing"><p class="hint">Pick the time that suits you every day.</p><div class="trow"><label>From <input type="time" id="tFrom"></label><label>To <input type="time" id="tTo"></label></div></div>';
@@ -207,13 +214,19 @@ function withOther(k) {
   return (S[k] || []).map(function (v) { return v === 'Other' && t ? 'Other: ' + t : v; }).join(', ');
 }
 function fmt12(s) { if (!s) return ''; var p = s.split(':'), h = +p[0]; return (h % 12 || 12) + ':' + p[1] + ' ' + (h >= 12 ? 'PM' : 'AM'); }
-function timing() { return S.timing[0] === 'Specific time' ? 'Specific time: ' + fmt12($('#tFrom').value) + '–' + fmt12($('#tTo').value) : S.timing.join(', '); }
+function timing() {
+  var t = timingBase();
+  if (S.demo[0] === 'Yes, send details' && S.demoDate[0] && S.demoTime[0]) t += ' | Demo: ' + S.demoDate[0] + ', ' + S.demoTime[0];
+  return t;
+}
+function timingBase() { return S.timing[0] === 'Specific time' ? 'Specific time: ' + fmt12($('#tFrom').value) + '–' + fmt12($('#tTo').value) : S.timing.join(', '); }
 function bad(el, k, msg) { if (el) el.classList.add('invalid'); setErr(k, msg); return el || true; }
 
 // ===== Validation (every question required) =====
 function validate(step) {
   var first = null;
   Q[step].forEach(function (f) {
+    if (f.ifDemo && S.demo[0] !== 'Yes, send details') { setErr(f.k, ''); return; }
     var el = null, k = f.k;
     setErr(k, '');
     if (f.t === 'text') { if (!$('#' + k).value.trim()) el = bad($('#' + k), k, f.msg); }
@@ -250,6 +263,7 @@ $$('.eye').forEach(function (b) { b.addEventListener('click', function () { var 
 
 // ===== Navigation + history (phone Back button stays inside the form) =====
 function render() {
+  ['demoDate', 'demoTime'].forEach(function (k) { var q = $('#q_' + k); if (q) q.hidden = S.demo[0] !== 'Yes, send details'; });
   formErr('');
   $$('.step').forEach(function (s) { s.classList.toggle('active', +s.dataset.step === current); });
   var inQ = current >= 1 && current <= TOTAL;
