@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CeK Classes · Find Your Batch</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--black:#080808;--red:#E50914;--red-d:#C20710;--bg:#F5F5F5;--text:#292929;--muted:#6B6B6B;--line:#E5E5E5;--r:14px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--text);background:var(--bg);line-height:1.5;display:flex;justify-content:center;min-height:100vh}
+.app{width:100%;max-width:480px;min-height:100vh;background:#fff;display:flex;flex-direction:column;padding:0 20px}
+@media(min-width:520px){body{padding:24px 0}.app{min-height:0;border-radius:24px;border:1px solid var(--line);box-shadow:0 8px 30px rgba(0,0,0,.06)}}
+.logo{padding-top:18px;font-weight:800;font-size:1.4rem;color:var(--black);letter-spacing:-.03em}
+.logo i{color:var(--red);font-style:normal}
+.progress{margin-top:16px;display:none}.progress.on{display:block}
+.pm{display:flex;justify-content:space-between;font-size:.75rem;font-weight:600;margin-bottom:8px}.pm span+span{color:var(--muted);font-weight:500}
+.segs{display:flex;gap:6px}.seg{flex:1;height:4px;border-radius:4px;background:var(--line)}.seg.done{background:var(--red)}
+main{flex:1;padding:22px 0 8px}
+.step{display:none;animation:rise .25s ease both}.step.active{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+h1{font-size:1.7rem;line-height:1.2;font-weight:800;color:var(--black);letter-spacing:-.02em}
+h2{font-size:1.35rem;line-height:1.25;font-weight:800;color:var(--black)}
+.sub{color:var(--muted);font-size:.95rem;margin-top:6px}
+.dot{display:inline-block;width:.42em;height:.42em;border-radius:50%;background:var(--red);margin-left:.12em}
+.eyebrow{font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:26px 0 10px}
+.facts{list-style:none;margin:22px 0 6px;display:grid;gap:10px}
+.facts li,.note div,.privacy{padding:12px 14px;background:var(--bg);border-radius:var(--r);font-size:.92rem}
+.facts li{display:flex;gap:12px}.facts li::before{content:"";flex:none;width:8px;height:8px;margin-top:.5em;border-radius:50%;background:var(--red)}
+.q{margin-top:24px}.label{display:block;font-size:.95rem;font-weight:700;color:var(--black);margin-bottom:4px}
+.hint{font-size:.8rem;color:var(--muted);margin-bottom:10px}.opt{font-weight:500;color:var(--muted);font-size:.8rem}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{font:inherit;font-size:.92rem;font-weight:600;color:var(--text);background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:11px 16px;min-height:46px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--black);border-color:var(--black);color:#fff}
+.chip[aria-pressed=true]::after{content:"";display:inline-block;width:7px;height:7px;margin-left:9px;border-radius:50%;background:var(--red)}
+.chip.wide{flex:1 1 100%;text-align:left}.chips.invalid .chip{border-color:var(--red)}
+input{width:100%;font:inherit;font-size:1rem;color:var(--black);background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;min-height:50px;outline:none}
+input:focus{border-color:var(--black);box-shadow:0 0 0 3px rgba(8,8,8,.08)}
+input.invalid{border-color:var(--red);box-shadow:0 0 0 3px rgba(229,9,20,.12)}
+.ob{margin-top:10px;display:none}.ob.show{display:block}
+.trow{display:flex;gap:12px}.trow label{flex:1;font-size:.8rem;font-weight:600;color:var(--muted)}.trow input{margin-top:6px}
+.err{color:var(--red);font-size:.8rem;font-weight:600;margin-top:6px;min-height:1.1em}
+.pw{position:relative}.pw input{padding-right:84px}
+.eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);font:inherit;font-size:.8rem;font-weight:700;color:var(--muted);background:none;border:0;padding:8px 10px;cursor:pointer}
+.privacy{margin-top:22px;font-size:.78rem;color:var(--muted)}
+.actions{padding:14px 0 calc(18px + env(safe-area-inset-bottom,0px));display:grid;gap:6px;position:sticky;bottom:0;background:linear-gradient(to bottom,rgba(255,255,255,0),#fff 28%)}
+.btn{font:inherit;font-weight:700;font-size:1rem;width:100%;min-height:54px;border:0;border-radius:999px;cursor:pointer;display:block;text-align:center;text-decoration:none;line-height:54px;padding:0}
+.btn.primary{background:var(--red);color:#fff}.btn.primary:hover{background:var(--red-d)}.btn.primary[disabled]{opacity:.6}
+.btn.ghost{background:none;color:var(--muted);font-weight:600;font-size:.9rem;min-height:40px;line-height:40px}
+.btn.dark{background:var(--black);color:#fff}
+button:focus-visible{outline:3px solid rgba(8,8,8,.35);outline-offset:2px}
+.done{text-align:center;padding-top:40px}
+.check{width:76px;height:76px;border-radius:50%;background:var(--black);margin:0 auto 22px;display:grid;place-items:center;color:#fff;font-size:2rem}
+.note{text-align:left;margin-top:26px;display:grid;gap:10px}
+.static{position:static;background:none;padding-top:22px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <!-- Replace this text with your logo: <img src="logo.png" alt="CeK" style="height:34px"> -->
+  <div class="logo">CeK<i>.</i> Classes</div>
+  <div class="progress" id="progress"><div class="pm"><span id="stepLbl"></span><span id="pctLbl"></span></div><div class="segs" id="segs"></div></div>
+</header>
+<main id="main">
+  <section class="step active" data-step="0">
+    <p class="eyebrow">Board Crash Course 2027</p>
+    <h1>Will this batch suit you?<span class="dot"></span></h1>
+    <p class="sub">Tap a few options. It takes about 2 minutes.</p>
+    <p class="sub">All questions are required so we can reply properly.</p>
+    <ul class="facts">
+      <li><span><b>Free demo class</b> before you decide.</span></li>
+      <li><span><b>Small batch of 20.</b> A mentor who knows your name.</span></li>
+      <li><span><b>Weak topics first.</b> Your answers tell us where to start.</span></li>
+    </ul>
+  </section>
+  <section class="step" data-step="1"><h2>About the student</h2><p class="sub">So we can match you to the right group.</p><div id="f1"></div></section>
+  <section class="step" data-step="2"><h2>The important bit</h2><p class="sub">These help us decide how to support you.</p><div id="f2"></div>
+    <div class="privacy">Your details are used only by CeK Classes to reply about this batch. They are not shared with anyone.</div></section>
+  <section class="step" data-step="3"><h2>Last few questions</h2><p class="sub">Be honest. This helps us plan your first week.</p><div id="f3"></div></section>
+  <section class="step" data-step="4"><h2>Create your account</h2><p class="sub">Use your email to log in later and see your batch details.</p>
+    <div class="q"><label class="label" for="email">Email</label><input type="email" id="email" autocomplete="email" autocapitalize="none" maxlength="100" placeholder="name@example.com"><div class="err" id="emailErr"></div></div>
+    <div class="q"><label class="label" for="pw">Create password</label><p class="hint">At least 8 characters, with a letter and a number.</p><div class="pw"><input type="password" id="pw" autocomplete="new-password" maxlength="64"><button type="button" class="eye" data-for="pw">Show</button></div><div class="err" id="pwErr"></div></div>
+    <div class="q"><label class="label" for="pw2">Confirm password</label><div class="pw"><input type="password" id="pw2" autocomplete="new-password" maxlength="64"><button type="button" class="eye" data-for="pw2">Show</button></div><div class="err" id="pw2Err"></div></div>
+    <div class="privacy">Your password is stored in scrambled form, never as plain text. Don't reuse a password from another account.</div></section>
+  <section class="step" data-step="5"><div class="done"><div class="check">✓</div>
+    <h2>Thank you<span class="dot"></span></h2><p class="sub" id="thanksSub"></p>
+    <div class="note"><div><b>Next:</b> expect a WhatsApp message from us shortly.</div><div id="batchLine"></div><div id="acctNote" hidden>Your account is ready. Log in anytime with your email.</div></div>
+    <div class="actions static"><a id="waBtn" class="btn dark" target="_blank" rel="noopener" hidden>Message us on WhatsApp</a><button type="button" class="btn ghost" id="newBtn">Fill form for another student</button></div>
+    <p class="sub" id="demoNote" hidden style="font-size:.75rem">Preview mode: nothing was saved. Set CEK_API to save to your Sheet.</p></div></section>
+  <section class="step" data-step="6"><h2>Log in</h2><p class="sub">Enter the email and password you created.</p>
+    <div class="q"><label class="label" for="lEmail">Email</label><input type="email" id="lEmail" autocomplete="email" autocapitalize="none" maxlength="100" placeholder="name@example.com"></div>
+    <div class="q"><label class="label" for="lPw">Password</label><div class="pw"><input type="password" id="lPw" autocomplete="current-password" maxlength="64"><button type="button" class="eye" data-for="lPw">Show</button></div><div class="err" id="loginErr"></div></div>
+    <p class="hint">Forgot your password? Message us on WhatsApp and we'll reset it.</p></section>
+  <section class="step" data-step="7"><div class="done"><div class="check">✓</div>
+    <h2>Welcome back<span class="dot"></span></h2><p class="sub" id="welcomeSub"></p>
+    <div class="note"><div>Your registration is confirmed. We'll message you on WhatsApp with demo class details.</div><div id="statusLine" hidden></div></div>
+    <div class="actions static"><button type="button" class="btn ghost" id="logoutBtn">Log out</button></div></div></section>
+</main>
+<div class="actions" id="actions">
+  <div class="err" id="formErr" role="alert" style="text-align:center"></div>
+  <button type="button" class="btn primary" id="nextBtn">Start</button>
+  <button type="button" class="btn ghost" id="backBtn" hidden>Back</button>
+  <button type="button" class="btn ghost" id="loginBtn">Already registered? Log in</button>
+</div>
+</div>
+
+<script>
+// ===== CONFIG: edit these =====
+var CEK_API = 'https://script.google.com/macros/s/AKfycbxgPnf-WyaL1WkMFAAG_bZ6NyGRSjM9GOOzw1jPw8zrtuOU17caEKqkoe8iFbyzvtdR/exec';
+var TEACHER_WHATSAPP = '';      // e.g. '919876543210' (no +). Empty hides the button.
+var FEE_TEXT = 'The online batch is ₹2499 for 3 months.';   // change the offer text here
+var BATCH_TEXT = '<b>Batch:</b> starts soon. Demo class details will come on WhatsApp.';
+
+(function () {
+'use strict';
+var $ = function (s, r) { return (r || document).querySelector(s); };
+var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+var qs = new URLSearchParams(location.search);
+var SRC = /^[\w-]{1,30}$/.test(qs.get('src') || '') ? qs.get('src') : 'whatsapp';
+var TOTAL = 3, current = 0, submitting = false, thanksName = '';
+function newId() { return 'L' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+var leadId = newId();
+
+// ===== Question definitions (the form is built from this) =====
+var Q = {
+ 1: [ {k:'name',t:'text',label:'Student name',ph:'First name is enough',max:60,msg:'Please enter the student name.'},
+      {k:'class',t:'single',label:'Class',o:['9','10','11','12']},
+      {k:'board',t:'single',label:'Board',o:['CBSE','ICSE','Other'],oph:'Type your board, e.g. Punjab Board (PSEB)'},
+      {k:'medium',t:'multi',label:'Medium',opt:'(pick all that apply)',o:['English','Hindi','Other'],oph:'Type your medium, e.g. Punjabi'} ],
+ 2: [ {k:'subjects',t:'multi',label:'Subjects you want help with',o:['Physics','Maths','Science','Computer Science']},
+      {k:'budget',t:'single',wide:1,label:'Does this fee work for you?',hint:FEE_TEXT,o:['Yes, it works','I need to discuss with my parents',"I'm looking for a lower fee"]},
+      {k:'demo',t:'single',label:'Want a free demo class?',o:['Yes, send details','Not yet']},
+      {k:'phone',t:'phone',label:'WhatsApp number',hint:"Student's or parent's number is fine.",ph:'10-digit mobile number'} ],
+ 3: [ {k:'otherSubjects',t:'multi',label:'Other subjects that are creating problems',hint:"Even if we don't teach them yet, this tells us what you struggle with.",o:['Chemistry','Biology','English','Hindi','Social Science','Accountancy','Other','No other subject'],ex:'No other subject',oph:'Type the subject, e.g. Economics'},
+      {k:'worry',t:'multi',wide:1,label:'Biggest worries',opt:'(pick any)',o:['Syllabus not finished','Weak topics','Low test scores',"Can't stay consistent",'Doubts not getting solved']},
+      {k:'timing',t:'single',label:'Which timing suits you?',o:['Morning','Afternoon','Evening','Weekends only','Specific time']},
+      {k:'school',t:'text',label:'School',ph:'e.g. Government Senior Secondary School, Phase 5',max:80,msg:'Please enter the school name.'} ]
+};
+var S = {};   // chip answers: S[key] = [values]
+
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function build() {
+  [1, 2, 3].forEach(function (n) {
+    $('#f' + n).innerHTML = Q[n].map(function (f) {
+      var h = '<div class="q"><' + (f.t === 'text' || f.t === 'phone' ? 'label for="' + f.k + '"' : 'span') + ' class="label">' + f.label + (f.opt ? ' <span class="opt">' + f.opt + '</span>' : '') + '</' + (f.t === 'text' || f.t === 'phone' ? 'label' : 'span') + '>';
+      if (f.hint) h += '<p class="hint">' + esc(f.hint) + '</p>';
+      if (f.t === 'text') h += '<input type="text" id="' + f.k + '" maxlength="' + f.max + '" placeholder="' + esc(f.ph) + '" autocomplete="off">';
+      else if (f.t === 'phone') h += '<input type="tel" id="phone" inputmode="numeric" maxlength="16" placeholder="' + f.ph + '" autocomplete="tel"><input type="text" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">';
+      else {
+        h += '<div class="chips" data-k="' + f.k + '" data-mode="' + f.t + '">' + f.o.map(function (o) {
+          return '<button type="button" class="chip' + (f.wide ? ' wide' : '') + '" data-v="' + esc(o) + '">' + esc(o) + '</button>'; }).join('') + '</div>';
+        if (f.oph) h += '<div class="ob" id="ob_' + f.k + '"><input type="text" id="o_' + f.k + '" maxlength="80" placeholder="' + esc(f.oph) + '" autocomplete="off"></div>';
+        if (f.k === 'timing') h += '<div class="ob" id="ob_timing"><p class="hint">Pick the time that suits you every day.</p><div class="trow"><label>From <input type="time" id="tFrom"></label><label>To <input type="time" id="tTo"></label></div></div>';
+      }
+      return h + '<div class="err" id="e_' + f.k + '" role="alert"></div></div>';
+    }).join('');
+  });
+  var sg = $('#segs'); sg.innerHTML = ''; for (var i = 0; i < TOTAL; i++) sg.appendChild(document.createElement('div')).className = 'seg';
+  $$('.chips').forEach(function (g) { S[g.dataset.k] = []; });
+  $('#batchLine').innerHTML = BATCH_TEXT;
+}
+build();
+
+function formErr(msg) { $('#formErr').textContent = msg || ''; }
+function setErr(k, msg) { var e = $('#e_' + k); if (e) e.textContent = msg || ''; }
+function defOf(k) { for (var n in Q) for (var i = 0; i < Q[n].length; i++) if (Q[n][i].k === k) return Q[n][i]; }
+
+// chips
+$('#main').addEventListener('click', function (e) {
+  var chip = e.target.closest('.chip'); if (!chip) return;
+  var g = chip.parentNode, k = g.dataset.k, f = defOf(k), v = chip.dataset.v, on = chip.getAttribute('aria-pressed') === 'true';
+  if (g.dataset.mode === 'single') {
+    $$('.chip', g).forEach(function (c) { c.setAttribute('aria-pressed', 'false'); });
+    if (!on) chip.setAttribute('aria-pressed', 'true');
+  } else {
+    if (!on && f.ex) {
+      if (v === f.ex) $$('.chip', g).forEach(function (c) { c.setAttribute('aria-pressed', 'false'); });
+      else $$('.chip', g).forEach(function (c) { if (c.dataset.v === f.ex) c.setAttribute('aria-pressed', 'false'); });
+    }
+    chip.setAttribute('aria-pressed', on ? 'false' : 'true');
+  }
+  S[k] = $$('.chip[aria-pressed=true]', g).map(function (c) { return c.dataset.v; });
+  var ob = $('#ob_' + k);
+  if (ob) {
+    var show = k === 'timing' ? S[k][0] === 'Specific time' : S[k].indexOf('Other') > -1;
+    ob.classList.toggle('show', show);
+    if (show && !on) { var inp = $('input', ob); if (inp) inp.focus({ preventScroll: true }); }
+  }
+  g.classList.remove('invalid'); setErr(k, '');
+});
+$('#main').addEventListener('input', function (e) {
+  var t = e.target; t.classList.remove('invalid');
+  var k = t.id.replace(/^o_/, '').replace(/^t(From|To)$/, 'timing'); setErr(k, ''); 
+});
+
+// ===== Helpers =====
+function cleanPhone(raw) {
+  var d = String(raw || '').replace(/\D/g, '');
+  if (d.length === 12 && d.indexOf('91') === 0) d = d.slice(2);
+  if (d.length === 11 && d.charAt(0) === '0') d = d.slice(1);
+  return d;
+}
+function withOther(k) {
+  var t = ($('#o_' + k) ? $('#o_' + k).value : '').trim();
+  return (S[k] || []).map(function (v) { return v === 'Other' && t ? 'Other: ' + t : v; }).join(', ');
+}
+function fmt12(s) { if (!s) return ''; var p = s.split(':'), h = +p[0]; return (h % 12 || 12) + ':' + p[1] + ' ' + (h >= 12 ? 'PM' : 'AM'); }
+function timing() { return S.timing[0] === 'Specific time' ? 'Specific time: ' + fmt12($('#tFrom').value) + '–' + fmt12($('#tTo').value) : S.timing.join(', '); }
+function bad(el, k, msg) { if (el) el.classList.add('invalid'); setErr(k, msg); return el || true; }
+
+// ===== Validation (every question required) =====
+function validate(step) {
+  var first = null;
+  Q[step].forEach(function (f) {
+    var el = null, k = f.k;
+    setErr(k, '');
+    if (f.t === 'text') { if (!$('#' + k).value.trim()) el = bad($('#' + k), k, f.msg); }
+    else if (f.t === 'phone') { if (!/^[6-9]\d{9}$/.test(cleanPhone($('#phone').value))) el = bad($('#phone'), k, 'Enter a valid 10-digit mobile number.'); }
+    else {
+      var g = $('.chips[data-k="' + k + '"]');
+      if (!S[k].length) { g.classList.add('invalid'); setErr(k, f.t === 'single' ? 'Please pick an option.' : 'Please pick at least one option.'); el = g; }
+      else if (f.oph && S[k].indexOf('Other') > -1 && !$('#o_' + k).value.trim()) el = bad($('#o_' + k), k, 'Please type it in the box.');
+      else if (k === 'timing' && S[k][0] === 'Specific time') {
+        var a = $('#tFrom').value, b = $('#tTo').value;
+        if (!a || !b) el = bad(!a ? $('#tFrom') : $('#tTo'), k, 'Pick both start and end time.');
+        else if (b <= a) el = bad($('#tTo'), k, 'End time must be after start time.');
+      }
+    }
+    if (el && !first) first = el;
+  });
+  if (first && first !== true) { first.scrollIntoView({ behavior: 'smooth', block: 'center' }); if (first.tagName === 'INPUT') first.focus({ preventScroll: true }); }
+  return !first;
+}
+
+// ===== Reset: a brand-new form and a brand-new Lead ID =====
+function resetForm() {
+  Object.keys(S).forEach(function (k) { S[k] = []; });
+  $$('.chip').forEach(function (c) { c.setAttribute('aria-pressed', 'false'); });
+  $$('.chips').forEach(function (g) { g.classList.remove('invalid'); });
+  $$('.ob').forEach(function (b) { b.classList.remove('show'); });
+  $$('input').forEach(function (i) { i.value = ''; i.classList.remove('invalid'); if (i.closest('.pw')) i.type = 'password'; });
+  $$('.err').forEach(function (e) { e.textContent = ''; });
+  eyes();
+  leadId = newId(); submitting = false; thanksName = '';
+}
+function eyes() { $$('.eye').forEach(function (b) { b.textContent = $('#' + b.dataset.for).type === 'password' ? 'Show' : 'Hide'; }); }
+$$('.eye').forEach(function (b) { b.addEventListener('click', function () { var i = $('#' + b.dataset.for); i.type = i.type === 'password' ? 'text' : 'password'; eyes(); }); });
+
+// ===== Navigation + history (phone Back button stays inside the form) =====
+function render() {
+  formErr('');
+  $$('.step').forEach(function (s) { s.classList.toggle('active', +s.dataset.step === current); });
+  var inQ = current >= 1 && current <= TOTAL;
+  $('#progress').classList.toggle('on', inQ);
+  $('#actions').hidden = current === 5 || current === 7;
+  $('#backBtn').hidden = !(inQ || current === 4 || current === 6);
+  $('#loginBtn').hidden = current !== 0;
+  if (inQ) {
+    var pct = Math.round(current / TOTAL * 100);
+    $('#stepLbl').textContent = 'Step ' + current + ' of ' + TOTAL; $('#pctLbl').textContent = pct + '% complete';
+    $$('.seg').forEach(function (s, i) { s.classList.toggle('done', i < current); });
+  }
+  if (!submitting) $('#nextBtn').textContent = ['Start', 'Continue', 'Continue', 'Submit', 'Create account', '', 'Log in'][current] || '';
+  $('#backBtn').textContent = current === 4 ? 'Skip for now' : 'Back';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function go(n) { current = n; render(); try { history.pushState({ s: n }, ''); } catch (e) {} }
+try { history.replaceState({ s: 0 }, ''); } catch (e) {}
+window.addEventListener('popstate', function () {
+  if (submitting) { try { history.pushState({ s: current }, ''); } catch (e) {} return; }
+  if (current >= 1 && current <= TOTAL) current--;
+  else if (current === 4) { finishFlow(false); return; }
+  else if (current >= 5) { resetForm(); current = 0; }
+  else if (current === 6) current = 0;
+  render();
+});
+
+$('#nextBtn').addEventListener('click', function () {
+  if (submitting) return;
+  if (current === 4) return createAccount();
+  if (current === 6) return loginUser();
+  if (current >= 1 && current <= TOTAL) {
+    if (!validate(current)) return;
+    if (current === 2) saveLead(false, function () {}, function () {});   // keep the important answers early
+    if (current === TOTAL) return submit();
+  }
+  go(current + 1);
+});
+$('#backBtn').addEventListener('click', function () {
+  if (submitting) return;
+  if (current === 4) return finishFlow(false);
+  if (current === 6) { current = 0; return render(); }
+  if (current > 0) { current--; render(); }
+});
+$('#loginBtn').addEventListener('click', function () { go(6); });
+$('#newBtn').addEventListener('click', function () { resetForm(); current = 0; render(); });
+$('#logoutBtn').addEventListener('click', function () { resetForm(); current = 0; render(); });
+document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); $('#nextBtn').click(); } });
+
+// ===== Server calls =====
+function api(action, data, ok, fail) {
+  if (!CEK_API) { console.log('Preview:', action, data); setTimeout(function () { ok({ success: true }); }, 300); return; }
+  var done = false, timer = setTimeout(function () { if (!done) { done = true; fail(); } }, 25000);
+  fetch(CEK_API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: action, data: data }) })
+    .then(function (r) { return r.json(); })
+    .then(function (res) { if (!done) { done = true; clearTimeout(timer); ok(res); } })
+    .catch(function () {
+      if (done) return; done = true; clearTimeout(timer);
+      // Browser blocked the reply (CORS). For leads only, send once more without reading the reply.
+      if (action === 'submitLead') {
+        fetch(CEK_API, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: action, data: data }) })
+          .then(function () { ok({ success: true, unverified: true }); }, function () { fail(); });
+      } else fail();
+    });
+}
+function payload(complete) {
+  return { leadId: leadId, complete: complete, studentClass: S.class.join(', '), board: withOther('board'), medium: withOther('medium'),
+    subjects: S.subjects.join(', '), otherSubjects: withOther('otherSubjects'), worry: S.worry.join(', '), timing: timing(),
+    budget: S.budget.join(', '), demo: S.demo.join(', '), phone: cleanPhone($('#phone').value), name: $('#name').value.trim(),
+    school: $('#school').value.trim(), source: SRC, language: 'en', website: $('#hp').value };
+}
+function saveLead(complete, ok, fail) { var p = payload(complete); api('submitLead', p, ok, fail); return p; }
+
+function submit() {
+  submitting = true;
+  var btn = $('#nextBtn'); btn.disabled = true; btn.textContent = 'Sending…';
+  var p;
+  try { p = saveLead(true, function (res) {
+    btn.disabled = false; submitting = false;
+    if (res && res.success) { thanksName = p.name.split(' ')[0]; go(4); }
+    else { render(); formErr((res && res.error) || 'Could not save. Please try again.'); }
+  }, function () { btn.disabled = false; submitting = false; render(); formErr('No connection. Please try again.'); }); }
+  catch (err) { btn.disabled = false; submitting = false; render(); formErr('Error: ' + err.message); }
+}
+
+// Lead is saved; now (optionally) the account, then the thank-you screen with a fresh, empty form behind it
+function finishFlow(accountMade) {
+  var name = thanksName;
+  resetForm();
+  $('#thanksSub').textContent = name ? "We've received your answers, " + name + '.' : "We've received your answers.";
+  $('#demoNote').hidden = !!CEK_API;
+  $('#acctNote').hidden = !accountMade;
+  if (TEACHER_WHATSAPP) { var wa = $('#waBtn'); wa.href = 'https://wa.me/' + TEACHER_WHATSAPP + '?text=' + encodeURIComponent('Hi, I filled the CeK crash course form.'); wa.hidden = false; }
+  current = 5; render();
+  try { history.replaceState({ s: 5 }, ''); } catch (e) {}
+}
+
+var EMAIL_RE = /^[A-Za-z0-9][^\s@]*@[^\s@]+\.[^\s@]{2,}$/;
+function pwOk(p) { return p.length >= 8 && p.length <= 64 && /[A-Za-z]/.test(p) && /\d/.test(p); }
+function createAccount() {
+  var email = $('#email').value.trim().toLowerCase(), pw = $('#pw').value, pw2 = $('#pw2').value;
+  var e1 = EMAIL_RE.test(email), e2 = pwOk(pw), e3 = pw === pw2;
+  $('#email').classList.toggle('invalid', !e1); $('#pw').classList.toggle('invalid', !e2); $('#pw2').classList.toggle('invalid', e2 && !e3);
+  $('#emailErr').textContent = e1 ? '' : 'Enter a valid email address.';
+  $('#pwErr').textContent = e2 ? '' : 'Use at least 8 characters with a letter and a number.';
+  $('#pw2Err').textContent = !e2 || e3 ? '' : 'Passwords do not match.';
+  if (!e1) return $('#email').focus(); if (!e2) return $('#pw').focus(); if (!e3) return $('#pw2').focus();
+  submitting = true; var btn = $('#nextBtn'); btn.disabled = true; btn.textContent = 'Creating…';
+  api('createAccount', { email: email, password: pw, leadId: leadId }, function (res) {
+    btn.disabled = false; submitting = false;
+    if (res && res.success) finishFlow(true); else { render(); $('#emailErr').textContent = (res && res.error) || 'Could not save. Please try again.'; }
+  }, function () { btn.disabled = false; submitting = false; render(); $('#emailErr').textContent = 'No connection. Please try again.'; });
+}
+function loginUser() {
+  var email = $('#lEmail').value.trim().toLowerCase(), pw = $('#lPw').value, err = $('#loginErr');
+  if (!EMAIL_RE.test(email)) { err.textContent = 'Enter a valid email address.'; return $('#lEmail').focus(); }
+  if (!pw) { err.textContent = 'Enter your password.'; return $('#lPw').focus(); }
+  err.textContent = ''; submitting = true; var btn = $('#nextBtn'); btn.disabled = true; btn.textContent = 'Checking…';
+  api('loginUser', { email: email, password: pw }, function (res) {
+    btn.disabled = false; submitting = false;
+    if (res && res.success) {
+      $('#lPw').value = '';
+      $('#welcomeSub').textContent = res.name ? 'Hi, ' + res.name + '.' : '';
+      $('#statusLine').hidden = !res.status; $('#statusLine').textContent = res.status ? 'Latest update: ' + res.status : '';
+      current = 7; render();
+    } else { render(); err.textContent = (res && res.error) || 'Email or password is incorrect.'; }
+  }, function () { btn.disabled = false; submitting = false; render(); err.textContent = 'No connection. Please try again.'; });
+}
+render();
+})();
+</script>
+</body>
+</html>
